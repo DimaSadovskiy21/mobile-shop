@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const ProductModel = require('../models/product');
 
 const ProductService = {
@@ -9,13 +10,15 @@ const ProductService = {
     return await ProductModel.findById(id);
   },
 
-  newProduct: async (title, images, price, sizes, description) => {
+  newProduct: async (title, images, price, sizes, description, sex, typeOfClothing) => {
     const product = await ProductModel.create({
       title,
       images,
       price,
       sizes,
       description,
+      sex,
+      typeOfClothing,
     });
     return product;
   },
@@ -28,7 +31,7 @@ const ProductService = {
       return false;
     }
   },
-  updateProduct: async (id, title, images, price, sizes, description) => {
+  updateProduct: async (id, title, images, price, sizes, description, sex, typeOfClothing) => {
     const product = await ProductModel.findOneAndUpdate(
       {
         _id: id,
@@ -40,6 +43,8 @@ const ProductService = {
           price,
           sizes,
           description,
+          sex,
+          typeOfClothing,
         },
       },
       {
@@ -47,6 +52,42 @@ const ProductService = {
       },
     );
     return product;
+  },
+  toggleFavorite: async (id, user) => {
+    let productCheck = await ProductModel.findById(id);
+    const hasUser = productCheck.favoritedBy.indexOf(user.id);
+
+    if (hasUser >= 0) {
+      return await ProductModel.findByIdAndUpdate(
+        id,
+        {
+          $pull: {
+            favoritedBy: mongoose.Types.ObjectId(user.id),
+          },
+          $inc: {
+            favoriteCount: -1,
+          },
+        },
+        {
+          new: true,
+        },
+      );
+    } else {
+      return await ProductModel.findByIdAndUpdate(
+        id,
+        {
+          $push: {
+            favoritedBy: mongoose.Types.ObjectId(user.id),
+          },
+          $inc: {
+            favoriteCount: 1,
+          },
+        },
+        {
+          new: true,
+        },
+      );
+    }
   },
 };
 

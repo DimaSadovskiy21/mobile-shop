@@ -4,7 +4,6 @@ const router = new Router();
 const { body } = require('express-validator');
 const authMiddleware = require('../middlewares/auth-middleware');
 const ProductController = require('../controllers/product-controller');
-const ProductService = require('../service/product-service');
 
 router.post(
   '/signUp',
@@ -22,9 +21,11 @@ router.post('/logout', userController.logout);
 router.get('/activate/:link', userController.activate);
 router.get('/refresh', userController.refresh);
 router.get('/users', authMiddleware, userController.getUsers);
+router.get('/me', authMiddleware, userController.me);
 router.get('/products', ProductController.getProducts);
 router.get(`/product/:id`, ProductController.getProduct);
 router.post('/newProduct', authMiddleware, ProductController.newProduct);
 router.delete('/deleteProduct/:id', authMiddleware, ProductController.deleteProduct);
 router.patch('/updateProduct', authMiddleware, ProductController.updateProduct);
+router.post('/toggleFavorite', authMiddleware, ProductController.toggleFavorite);
 module.exports = router;

@@ -19,6 +19,12 @@ const ProductSchema = new mongoose.Schema(
     description: {
       type: String,
     },
+    sex: {
+      type: String,
+    },
+    typeOfClothing: {
+      type: String,
+    },
     addedBy: [
       {
         type: mongoose.Schema.Types.ObjectId,

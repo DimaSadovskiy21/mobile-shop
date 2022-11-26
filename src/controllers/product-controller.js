@@ -1,7 +1,7 @@
 const ProductService = require('../service/product-service');
 const UserModel = require('../models/user');
 const ApiError = require('../exceptions/api-error');
-//
+
 const isAdmin = (user) => {
   return user.roles.includes('Admin');
 };
@@ -30,8 +30,16 @@ const ProductController = {
       if (!isAdmin(user)) {
         return next(ApiError.BadRequestForAdmin('create'));
       }
-      const { title, images, price, sizes, description } = req.body;
-      const product = await ProductService.newProduct(title, images, price, sizes, description);
+      const { title, images, price, sizes, description, sex, typeOfClothing } = req.body;
+      const product = await ProductService.newProduct(
+        title,
+        images,
+        price,
+        sizes,
+        description,
+        sex,
+        typeOfClothing,
+      );
       return res.json(product);
     } catch (e) {
       next(e);
@@ -56,7 +64,7 @@ const ProductController = {
       if (!user.roles.includes('Admin')) {
         return next(ApiError.BadRequestForAdmin('update'));
       }
-      const { id, title, images, price, sizes, description } = req.body;
+      const { id, title, images, price, sizes, description, sex, typeOfClothing } = req.body;
       const product = await ProductService.updateProduct(
         id,
         title,
@@ -64,8 +72,19 @@ const ProductController = {
         price,
         sizes,
         description,
+        sex,
+        typeOfClothing,
       );
       return res.json(product);
+    } catch (e) {
+      next(e);
+    }
+  },
+  toggleFavorite: async (req, res, next) => {
+    try {
+      const { id } = req.body;
+      const productFavorite = await ProductService.toggleFavorite(id, req.user);
+      return res.json(productFavorite);
     } catch (e) {
       next(e);
     }

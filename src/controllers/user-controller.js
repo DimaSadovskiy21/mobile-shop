@@ -95,6 +95,15 @@ const UserController = {
       next(e);
     }
   },
+  me: async (req, res, next) => {
+    try {
+      const { id } = req.user;
+      const me = await UserService.me(id);
+      return res.json(me);
+    } catch {
+      next(e);
+    }
+  },
 };
 
 module.exports = UserController;

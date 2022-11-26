@@ -118,6 +118,10 @@ const UserService = {
   getAllUsers: async () => {
     return await UserModel.find();
   },
+
+  me: async (id) => {
+    return await UserModel.findById(id);
+  },
 };
 
 module.exports = UserService;
