@@ -9,7 +9,8 @@ const isAdmin = (user) => {
 const ProductController = {
   getProducts: async (req, res, next) => {
     try {
-      const products = await ProductService.getProducts();
+      const { sex, typeOfClothing } = req.query;
+      const products = await ProductService.getProducts(sex, typeOfClothing);
       return res.json(products);
     } catch (e) {
       next(e);
@@ -83,8 +84,26 @@ const ProductController = {
   toggleFavorite: async (req, res, next) => {
     try {
       const { id } = req.body;
-      const productFavorite = await ProductService.toggleFavorite(id, req.user);
-      return res.json(productFavorite);
+      const product = await ProductService.toggleFavorite(id, req.user);
+      return res.json(product);
+    } catch (e) {
+      next(e);
+    }
+  },
+  addToCart: async (req, res, next) => {
+    try {
+      const { id } = req.body;
+      const product = await ProductService.addToCart(id, req.user);
+      return res.json(product);
+    } catch (e) {
+      next(e);
+    }
+  },
+  deleteToCart: async (req, res, next) => {
+    try {
+      const { id } = req.body;
+      const product = await ProductService.deleteToCart(id, req.user);
+      return res.json(product);
     } catch (e) {
       next(e);
     }

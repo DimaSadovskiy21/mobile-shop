@@ -1,8 +1,18 @@
 const mongoose = require('mongoose');
 const ProductModel = require('../models/product');
+const UserModel = require('../models/user');
 
 const ProductService = {
-  getProducts: async () => {
+  getProducts: async (sex, typeOfClothing) => {
+    if (sex && !typeOfClothing) {
+      return await ProductModel.find({ sex });
+    }
+    if (!sex && typeOfClothing) {
+      return await ProductModel.find({ typeOfClothing });
+    }
+    if (sex && typeOfClothing) {
+      return await ProductModel.find({ sex, typeOfClothing });
+    }
     return await ProductModel.find();
   },
 
@@ -58,6 +68,17 @@ const ProductService = {
     const hasUser = productCheck.favoritedBy.indexOf(user.id);
 
     if (hasUser >= 0) {
+      await UserModel.findByIdAndUpdate(
+        user.id,
+        {
+          $pull: {
+            favorites: mongoose.Types.ObjectId(id),
+          },
+        },
+        {
+          new: true,
+        },
+      );
       return await ProductModel.findByIdAndUpdate(
         id,
         {
@@ -73,6 +94,17 @@ const ProductService = {
         },
       );
     } else {
+      await UserModel.findByIdAndUpdate(
+        user.id,
+        {
+          $push: {
+            favorites: mongoose.Types.ObjectId(id),
+          },
+        },
+        {
+          new: true,
+        },
+      );
       return await ProductModel.findByIdAndUpdate(
         id,
         {
@@ -88,6 +120,55 @@ const ProductService = {
         },
       );
     }
+  },
+  addToCart: async (id, user) => {
+    await UserModel.findByIdAndUpdate(
+      user.id,
+      {
+        $push: {
+          cart: mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        new: true,
+      },
+    );
+
+    return await ProductModel.findByIdAndUpdate(
+      id,
+      {
+        $push: {
+          addedBy: mongoose.Types.ObjectId(user.id),
+        },
+      },
+      {
+        new: true,
+      },
+    );
+  },
+  deleteToCart: async (id, user) => {
+    await UserModel.findByIdAndUpdate(
+      user.id,
+      {
+        $pull: {
+          cart: mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        new: true,
+      },
+    );
+    return await ProductModel.findByIdAndUpdate(
+      id,
+      {
+        $pull: {
+          addedBy: mongoose.Types.ObjectId(user.id),
+        },
+      },
+      {
+        new: true,
+      },
+    );
   },
 };
 

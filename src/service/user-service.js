@@ -5,6 +5,7 @@ const TokenService = require('./token-service');
 const UserDto = require('../dtos/user-dto');
 const mailService = require('./mail.service');
 const ApiError = require('../exceptions/api-error');
+const ProductModel = require('../models/product');
 
 const getUserDto = async (user) => {
   const userDto = UserDto(user);
@@ -121,6 +122,14 @@ const UserService = {
 
   me: async (id) => {
     return await UserModel.findById(id);
+  },
+
+  favorites: async (user) => {
+    return await ProductModel.find({ favoritedBy: user.id }).sort({ _id: -1 });
+  },
+
+  cart: async (user) => {
+    return await ProductModel.find({ addedBy: user.id }).sort({ _id: -1 });
   },
 };
 

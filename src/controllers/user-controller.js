@@ -100,7 +100,23 @@ const UserController = {
       const { id } = req.user;
       const me = await UserService.me(id);
       return res.json(me);
-    } catch {
+    } catch (e) {
+      next(e);
+    }
+  },
+  favorites: async (req, res, next) => {
+    try {
+      const favorites = await UserService.favorites(req.user);
+      return res.json(favorites);
+    } catch (e) {
+      next(e);
+    }
+  },
+  cart: async (req, res, next) => {
+    try {
+      const cart = await UserService.cart(req.user);
+      return res.json(cart);
+    } catch (e) {
       next(e);
     }
   },
