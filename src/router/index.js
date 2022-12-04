@@ -23,7 +23,6 @@ router.get('/refresh', userController.refresh);
 router.get('/users', authMiddleware, userController.getUsers);
 router.get('/me', authMiddleware, userController.me);
 router.get('/favorites', authMiddleware, userController.favorites);
-router.get('/cart', authMiddleware, userController.cart);
 router.get('/products', ProductController.getProducts);
 router.get('/product/:id', ProductController.getProduct);
 router.post('/newProduct', authMiddleware, ProductController.newProduct);

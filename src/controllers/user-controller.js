@@ -112,14 +112,6 @@ const UserController = {
       next(e);
     }
   },
-  cart: async (req, res, next) => {
-    try {
-      const cart = await UserService.cart(req.user);
-      return res.json(cart);
-    } catch (e) {
-      next(e);
-    }
-  },
 };
 
 module.exports = UserController;

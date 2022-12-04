@@ -25,12 +25,6 @@ const ProductSchema = new mongoose.Schema(
     typeOfClothing: {
       type: String,
     },
-    addedBy: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-      },
-    ],
     favoriteCount: {
       type: Number,
       default: 0,

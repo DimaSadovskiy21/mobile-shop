@@ -1,19 +1,70 @@
 const mongoose = require('mongoose');
 const ProductModel = require('../models/product');
 const UserModel = require('../models/user');
+const uuid = require('uuid');
 
 const ProductService = {
-  getProducts: async (sex, typeOfClothing) => {
+  getProducts: async (sex, typeOfClothing, cursor) => {
+    const limit = 10;
+    let hasNextPage = false;
+    let products;
+    let cursorQuery = {};
+
     if (sex && !typeOfClothing) {
-      return await ProductModel.find({ sex });
-    }
-    if (!sex && typeOfClothing) {
-      return await ProductModel.find({ typeOfClothing });
+      products = await ProductModel.find({ sex })
+        .sort({ _id: -1 })
+        .limit(limit + 1);
     }
     if (sex && typeOfClothing) {
-      return await ProductModel.find({ sex, typeOfClothing });
+      products = await ProductModel.find({ sex, typeOfClothing })
+        .sort({ _id: -1 })
+        .limit(limit + 1);
     }
-    return await ProductModel.find();
+    if (sex && typeOfClothing && cursor) {
+      products = await ProductModel.find({ sex, typeOfClothing, _id: { $lt: cursor } })
+        .sort({ _id: -1 })
+        .limit(limit + 1);
+    }
+    if (sex && !typeOfClothing && cursor) {
+      products = await ProductModel.find({ sex, _id: { $lt: cursor } })
+        .sort({ _id: -1 })
+        .limit(limit + 1);
+    }
+    if (!sex && typeOfClothing) {
+      products = await ProductModel.find({ typeOfClothing })
+        .sort({ _id: -1 })
+        .limit(limit + 1);
+    }
+    if (!sex && typeOfClothing && cursor) {
+      products = await ProductModel.find({ typeOfClothing, _id: { $lt: cursor } })
+        .sort({ _id: -1 })
+        .limit(limit + 1);
+    }
+
+    if (!sex && !typeOfClothing && cursor) {
+      products = await ProductModel.find({ _id: { $lt: cursor } })
+        .sort({ _id: -1 })
+        .limit(limit + 1);
+    }
+
+    if (!sex && !typeOfClothing && !cursor) {
+      products = await ProductModel.find()
+        .sort({ _id: -1 })
+        .limit(limit + 1);
+    }
+
+    if (products.length > limit) {
+      hasNextPage = true;
+      products = products.slice(0, -1);
+    }
+
+    const newCursor = products[products.length - 1]._id;
+
+    return {
+      products,
+      cursor: newCursor,
+      hasNextPage,
+    };
   },
 
   getProduct: async (id) => {
@@ -122,23 +173,18 @@ const ProductService = {
     }
   },
   addToCart: async (id, user) => {
-    await UserModel.findByIdAndUpdate(
+    let product = await ProductModel.findById(id);
+    return await UserModel.findByIdAndUpdate(
       user.id,
       {
         $push: {
-          cart: mongoose.Types.ObjectId(id),
-        },
-      },
-      {
-        new: true,
-      },
-    );
-
-    return await ProductModel.findByIdAndUpdate(
-      id,
-      {
-        $push: {
-          addedBy: mongoose.Types.ObjectId(user.id),
+          cart: {
+            id: uuid.v4(),
+            title: product.title,
+            images: product.images,
+            price: product.price,
+            sizes: product.sizes,
+          },
         },
       },
       {
@@ -147,22 +193,11 @@ const ProductService = {
     );
   },
   deleteToCart: async (id, user) => {
-    await UserModel.findByIdAndUpdate(
+    return await UserModel.findByIdAndUpdate(
       user.id,
       {
         $pull: {
-          cart: mongoose.Types.ObjectId(id),
-        },
-      },
-      {
-        new: true,
-      },
-    );
-    return await ProductModel.findByIdAndUpdate(
-      id,
-      {
-        $pull: {
-          addedBy: mongoose.Types.ObjectId(user.id),
+          cart: { id },
         },
       },
       {

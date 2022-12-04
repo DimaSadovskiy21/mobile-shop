@@ -9,8 +9,8 @@ const isAdmin = (user) => {
 const ProductController = {
   getProducts: async (req, res, next) => {
     try {
-      const { sex, typeOfClothing } = req.query;
-      const products = await ProductService.getProducts(sex, typeOfClothing);
+      const { sex, typeOfClothing, cursor } = req.query;
+      const products = await ProductService.getProducts(sex, typeOfClothing, cursor);
       return res.json(products);
     } catch (e) {
       next(e);

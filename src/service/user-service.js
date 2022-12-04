@@ -127,10 +127,6 @@ const UserService = {
   favorites: async (user) => {
     return await ProductModel.find({ favoritedBy: user.id }).sort({ _id: -1 });
   },
-
-  cart: async (user) => {
-    return await ProductModel.find({ addedBy: user.id }).sort({ _id: -1 });
-  },
 };
 
 module.exports = UserService;
